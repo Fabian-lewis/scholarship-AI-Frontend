@@ -4,6 +4,8 @@ import os
 from supabase import create_client, Client
 from routes import routes
 
+from flask_cors import CORS
+
 
 ## Load environment variables
 load_dotenv()
@@ -13,6 +15,7 @@ url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
 
 # Register Blueprint
 app.register_blueprint(routes)

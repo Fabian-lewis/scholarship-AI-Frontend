@@ -33,31 +33,57 @@
         }
       ];
 
-      function renderScholarships() {
+      async function renderScholarships()  {
+        const email = localStorage.getItem("userEmail");
+        const url = `http://localhost:5000/scholarships?email=${email}`;
+
         const container = document.getElementById('scholarshipsList');
+
+        try {
+            const response = await fetch(url);
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to fetch scholarships");
+            }
+
+            const scholarships = result.scholarships || []; // Ensure scholarships is an array
+
+            const list = document.getElementById("scholarship-list");
+
+            if(!Array.isArray(scholarships) || scholarships.length === 0) {
+                list.innerHTML = "<li>No Scholarships found for your profile.</li>";
+                return;
+            }
+
+            scholarships.forEach(scholarship => {
+                const scholarshipCard = document.createElement('div');
+                scholarshipCard.className = 'scholarship-card';
+          
+                scholarshipCard.innerHTML = `
+                    <div>
+                    <a href="${scholarship.link}" target="_blank" rel="noopener noreferrer" class="scholarship-title">
+                        ${scholarship.name}
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                        </svg>
+                    </a>
+                    <p class="scholarship-description">${scholarship.description.substring(0,800)}...</p>
+                    <div class="scholarship-tags">
+                        <span class="tag recommended">Recommended</span>
+                        <span class="tag active">Active</span>
+                    </div>
+                    </div>
+                `;
+                
+                container.appendChild(scholarshipCard);
+            });
+
+        } catch (error) {
+            console.error("Error fetching scholarships:", error);
+            container.innerHTML = "<p class='error'>Failed to load scholarships. Please try again later.</p>";
+        }
         
-        scholarships.forEach(scholarship => {
-          const scholarshipCard = document.createElement('div');
-          scholarshipCard.className = 'scholarship-card';
-          
-          scholarshipCard.innerHTML = `
-            <div>
-              <a href="${scholarship.url}" target="_blank" rel="noopener noreferrer" class="scholarship-title">
-                ${scholarship.name}
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
-                </svg>
-              </a>
-              <p class="scholarship-description">${scholarship.description}</p>
-              <div class="scholarship-tags">
-                <span class="tag recommended">Recommended</span>
-                <span class="tag active">Active</span>
-              </div>
-            </div>
-          `;
-          
-          container.appendChild(scholarshipCard);
-        });
+        
       }
 
       // Load scholarships when page loads

@@ -5,6 +5,9 @@ e.preventDefault();
 const submitBtn = document.getElementById('submitBtn');
 const formData = new FormData(this);
 
+// Define the API endpoint
+const url = "http://localhost:5000/register";
+
 // Show loading state
 submitBtn.disabled = true;
 submitBtn.innerHTML = `
@@ -17,20 +20,41 @@ await new Promise(resolve => setTimeout(resolve, 1500));
 
 // Get form data
 const data = {
-    fullName: formData.get('fullName'),
-    email: formData.get('email'),
-    country: formData.get('country'),
-    educationLevel: formData.get('educationLevel'),
-    interests: formData.get('interests')
+    name: formData.get("fullName"),
+    email: formData.get("email"),
+    country: formData.get("country"),
+    level: formData.get("educationLevel"),
+    interests: formData.get("interests").split(",").map(item => item.trim())
 };
 
 console.log('Registration submitted:', data);
 
-// Show success message
-alert('Registration successful! Finding your scholarship matches...');
+ try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("🎉 Registration successful! Redirecting to your dashboard...");
+      localStorage.setItem("userEmail", data.email);
+      window.location.href = "dashboard.html";
+    } else {
+      alert("❌ Registration failed: " + result.error);
+    }
+
+  } catch (error) {
+    alert("❌ Network error: " + error.message);
+  }
+
+
+
 
 // Navigate to dashboard after delay
-setTimeout(() => {
-    window.location.href = 'dashboard_lov.html';
-}, 2000);
+// setTimeout(() => {
+//     window.location.href = 'dashboard_lov.html';
+// }, 2000);
 });

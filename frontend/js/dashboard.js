@@ -1,6 +1,6 @@
 // frontend/js/dashboard.js
 document.addEventListener("DOMContentLoaded", async () => {
-  const email = 'fabian@example.com' //localStorage.getItem("userEmail");
+  const email = localStorage.getItem("userEmail");
 
   const url = `http://localhost:5000/scholarships?email=${email}`;
 
@@ -12,17 +12,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const response = await fetch(url);
-    const scholarships = await response.json();
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to fetch scholarships");
+    }
+
+    const scholarships = result.scholarships || []; // Ensure scholarships is an array
 
     const list = document.getElementById("scholarship-list");
-    if (scholarships.length === 0) {
-      list.innerHTML = "<li>No scholarships found for your profile yet 😕</li>";
+
+    if(!Array.isArray(scholarships) || scholarships.length === 0) {
+      list.innerHTML = "<li>No Scholarships found for your profile.</li>";
       return;
     }
+    // if (scholarships.length === 0) {
+    //   list.innerHTML = "<li>No scholarships found for your profile yet 😕</li>";
+    //   return;
+    // }
 
     scholarships.forEach(s => {
       const li = document.createElement("li");
-      li.innerHTML = `<a href="${s.link}" target="_blank">${s.name}</a> - ${s.description}`;
+      li.innerHTML = `<a href="${s.link}" target="_blank">${s.name}</a> - ${s.description.substring(0, 200)}...`;
       list.appendChild(li);
     });
 
