@@ -6,7 +6,7 @@ const submitBtn = document.getElementById('submitBtn');
 const formData = new FormData(this);
 
 // Define the API endpoint
-const url = "http://localhost:5000/register";
+const url = "https://scholarship-ai-backend-ny79.onrender.com";
 
 // Show loading state
 submitBtn.disabled = true;

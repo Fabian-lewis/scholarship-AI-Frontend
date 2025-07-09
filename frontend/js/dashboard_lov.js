@@ -35,7 +35,7 @@ const scholarships = [
 
 async function renderScholarships()  {
   const email = localStorage.getItem("userEmail");
-  const url = `http://localhost:5000/scholarships?email=${email}`;
+  const url = `https://scholarship-ai-backend-ny79.onrender.com/scholarships?email=${email}`;
 
   const container = document.getElementById('scholarshipsList');
 
