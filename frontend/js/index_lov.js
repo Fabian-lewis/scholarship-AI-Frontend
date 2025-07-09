@@ -41,7 +41,7 @@ console.log('Registration submitted:', data);
     if (response.ok) {
       alert("🎉 Registration successful! Redirecting to your dashboard...");
       localStorage.setItem("userEmail", data.email);
-      window.location.href = "dashboard.html";
+      window.location.href = "dashboard_lov.html";
     } else {
       alert("❌ Registration failed: " + result.error);
     }
