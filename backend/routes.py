@@ -3,6 +3,7 @@
 from flask import Blueprint, request, jsonify
 import os
 from utils.supabase_client import supabase
+from backend.utils.llama_grok_client import analyze_scholarship_with_groq 
 
 
 routes = Blueprint('routes', __name__)
@@ -65,26 +66,61 @@ def get_scholarships():
         if not sch.get("country_tags") or not sch.get("level_tags") or not sch.get("field_tags"):
             continue # Skip scholarships without tags
 
+        if not sch.get("description"):
+            continue # Skip scholarships without description
+
+        sch_name = sch.get("name").lower()
+        if sch_name in added:
+            continue  # Skip duplicates
+
         # Match logic: at least one match in each category
         country_match = user_country in [c.lower() for c in sch["country_tags"]]
         level_match = user_level in [l.lower() for l in sch["level_tags"]]
         field_match = any(f.lower() in user_interests for f in sch["field_tags"])
 
         if country_match or level_match and field_match:
-            # Ensure we don't add duplicates
-            sch_name = sch.get("name").lower()
-            if sch_name not in added:
-                added.add(sch_name)
-                matches.append({
-                    "name": sch["name"],
-                    "link": sch["link"],
-                    "description": sch["description"],
-                    "country_tags": sch["country_tags"],
-                    "level_tags": sch["level_tags"],
-                    "field_tags": sch["field_tags"],
-                    "deadline": sch.get("deadline")
-            })
+            added.add(sch_name)
+            matches.append(format_scholarship(sch))
+            continue
+
+        ## AI Matching Logic
+        if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
+            added.add(sch_name)
+            matches.append(format_scholarship(sch))
+
+
     if not matches:
         return jsonify({"message": "No matching scholarships found"}), 404
     
     return jsonify({"scholarships": matches}), 200
+
+
+def ai_scholarship_match(user_country, user_level, user_interests, description):
+    try:
+        prompt = f"""
+User Profile:
+ - Country: {user_country}
+- Level: {user_level}
+- Interests: {', '.join(user_interests)}
+Scholarship Description:
+{description}
+
+Question: 
+Is this scholarship suitable for this user? Respond only with "YES" or "NO".
+"""
+        response = analyze_scholarship_with_groq(prompt)
+        return "YES" in response.upper()
+    except Exception as e:
+        print(f"AI Matching Error: {str(e)}")
+        return False
+    
+def format_scholarship(sch):
+    return {
+        "name": sch.get("name"),
+        "link": sch.get("link"),
+        "description": sch.get("description"),
+        "country_tags": sch.get("country_tags"),
+        "level_tags": sch.get("level_tags"),
+        "field_tags": sch.get("field_tags"),
+        "deadline": sch.get("deadline")
+    }
