@@ -5,6 +5,7 @@ import os
 from utils.supabase_client import supabase
 from utils.llama_grok_client import analyze_scholarship_with_grok
 import time
+import gc
 
 
 routes = Blueprint('routes', __name__)
@@ -58,39 +59,35 @@ def get_scholarships():
     scholarships_response = supabase.table("scholarships").select("*").execute()
     if not scholarships_response.data:
         return jsonify({"error": "No scholarships found"}), 404
+    
     scholarships = scholarships_response.data
 
     # Filter scholarships based on user country, level, and interests
     matches = []
     added = set()  # To avoid duplicates
-    for sch in scholarships:
-        if not sch.get("country_tags") or not sch.get("level_tags") or not sch.get("field_tags"):
-            continue # Skip scholarships without tags
+    BATCH_SIZE = 3  # Number of scholarships to process in one batch
 
-        if not sch.get("description"):
-            continue # Skip scholarships without description
+    for batch in chunk_list(scholarships, BATCH_SIZE):
+        for sch in batch:
+            if not sch.get("country_tags") or not sch.get("level_tags") or not sch.get("field_tags"):
+                continue # Skip scholarships without tags
+            if not sch.get("description"):
+                continue
 
-        sch_name = sch.get("name").lower()
-        if sch_name in added:
-            continue  # Skip duplicates
+            sch_name = sch.get("name").lower()
+            if sch_name in added:
+                continue
 
-        # # Match logic: at least one match in each category
-        # country_match = user_country in [c.lower() for c in sch["country_tags"]]
-        # level_match = user_level in [l.lower() for l in sch["level_tags"]]
-        # field_match = any(f.lower() in user_interests for f in sch["field_tags"])
-
-        # if country_match or level_match and field_match:
-        #     added.add(sch_name)
-        #     matches.append(format_scholarship(sch))
-        #     continue
-
-        ## AI Matching Logic
-        if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
-            added.add(sch_name)
-            matches.append(format_scholarship(sch))
-        time.sleep(15) # To avoid rate limiting issues with the AI service
-
-
+            try:
+                if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
+                    added.add(sch_name)
+                    matches.append(format_scholarship(sch))
+            except Exception as e:
+                print(f"Error processing scholarship {sch_name}: {e}")
+        
+        #pause after each batch to avoid rate limiting
+        time.sleep(10)
+        gc.collect() # Free up memory after each batch
     if not matches:
         return jsonify({"message": "No matching scholarships found"}), 404
     
@@ -130,3 +127,8 @@ def format_scholarship(sch):
         "field_tags": sch.get("field_tags"),
         "deadline": sch.get("deadline")
     }
+
+def chunk_list(data, chunk_size):
+    """Yield successive n-sized chunks from data."""
+    for i in range(0, len(data), chunk_size):
+        yield data[i:i + chunk_size]
