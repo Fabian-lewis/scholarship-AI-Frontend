@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify
 import os
 from utils.supabase_client import supabase
 from utils.llama_grok_client import analyze_scholarship_with_grok
+import time
 
 
 routes = Blueprint('routes', __name__)
@@ -87,6 +88,7 @@ def get_scholarships():
         if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
             added.add(sch_name)
             matches.append(format_scholarship(sch))
+        time.sleep(15) # To avoid rate limiting issues with the AI service
 
 
     if not matches:
@@ -112,6 +114,9 @@ Is this scholarship suitable for this user? Respond only with "YES" or "NO".
         print(f"AI Response: {response}")  # Debugging line to see the AI response
         return "YES" in response.upper()
     except Exception as e:
+        if "rate limit" in str(e).lower():
+            print("Rate limit exceeded, retrying after 5 seconds...")
+            time.sleep(15)
         print(f"AI Matching Error: {str(e)}")
         return False
     
