@@ -60,6 +60,7 @@ def get_scholarships():
 
     # Filter scholarships based on user country, level, and interests
     matches = []
+    added = set()  # To avoid duplicates
     for sch in scholarships:
         if not sch.get("country_tags") or not sch.get("level_tags") or not sch.get("field_tags"):
             continue # Skip scholarships without tags
@@ -70,14 +71,18 @@ def get_scholarships():
         field_match = any(f.lower() in user_interests for f in sch["field_tags"])
 
         if country_match or level_match and field_match:
-            matches.append({
-                "name": sch["name"],
-                "link": sch["link"],
-                "description": sch["description"],
-                "country_tags": sch["country_tags"],
-                "level_tags": sch["level_tags"],
-                "field_tags": sch["field_tags"],
-                "deadline": sch.get("deadline")
+            # Ensure we don't add duplicates
+            sch_name = sch.get("name").lower()
+            if sch_name not in added:
+                added.add(sch_name)
+                matches.append({
+                    "name": sch["name"],
+                    "link": sch["link"],
+                    "description": sch["description"],
+                    "country_tags": sch["country_tags"],
+                    "level_tags": sch["level_tags"],
+                    "field_tags": sch["field_tags"],
+                    "deadline": sch.get("deadline")
             })
     if not matches:
         return jsonify({"message": "No matching scholarships found"}), 404
