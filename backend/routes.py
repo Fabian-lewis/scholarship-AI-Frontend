@@ -3,7 +3,7 @@
 from flask import Blueprint, request, jsonify
 import os
 from utils.supabase_client import supabase
-from utils.llama_grok_client import analyze_scholarship_with_groq 
+from utils.llama_grok_client import analyze_scholarship_with_grok
 
 
 routes = Blueprint('routes', __name__)
@@ -108,7 +108,7 @@ Scholarship Description:
 Question: 
 Is this scholarship suitable for this user? Respond only with "YES" or "NO".
 """
-        response = analyze_scholarship_with_groq(prompt)
+        response = analyze_scholarship_with_grok(prompt)
         print(f"AI Response: {response}")  # Debugging line to see the AI response
         return "YES" in response.upper()
     except Exception as e:
