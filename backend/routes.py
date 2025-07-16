@@ -1,29 +1,27 @@
 ## Route Handlers for the backend
 # File: backend/routes.py
-from flask import Blueprint, request, jsonify
-import os
+from fastapi import APIRouter, HTTPException, Query, Request
 from utils.supabase_client import supabase
 from utils.llama_grok_client import analyze_scholarship_with_grok
-import time
-import gc
+import asyncio
 
 
-routes = Blueprint('routes', __name__)
+
+routes = APIRouter()
 
 ## Register Route to handle user registration
-@routes.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
+@routes.post('/register')
+async def register(request: Request):
+    data = await request.json()
     name = data.get("name")
     email = data.get("email")
     country = data.get("country")
     level = data.get("level")
-    interests = data.get("interests") # An array of interests
-    if not all([name, email, country, level, interests]):
-        return jsonify({"error": "Missing required fields"}), 400
-    
+    interests = data.get("interests")
 
-    # Insert the user into the database
+    if not all([name, email, country, level, interests]):
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
     try:
         result = supabase.table("users").insert({
             "name": name,
@@ -32,24 +30,20 @@ def register():
             "level": level,
             "interests": interests
         }).execute()
-
-        return jsonify({"message": "User registered successfully", "data": result.data}), 201
+        return {"message": "User registered successfully", "data": result.data}
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+        raise HTTPException(status_code=500, detail=str(e))
 
 ## Route to get scholarships based on user interests
-@routes.route('/scholarships', methods=['GET'])
-def get_scholarships():
-    email = request.args.get('email')
-    if not email:
-        return jsonify({"error": "Email parameter is required"}), 400
-    
-    # Get user by email
-    user_response = supabase.table("users").select("*").eq("email", email).execute()
+@routes.get('/scholarships') # This is a GET request
+async def get_scholarships(email: str = Query(...)): # Email is required as a query parameter
+    user_response = supabase.table('users').select("*").eq("email", email).execute()
     if not user_response.data:
-        return jsonify({"error": "User not found"}), 404
-    
+        raise HTTPException(status_code=404, detail="User not found")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email parameter is required")
+
+
     user = user_response.data[0] # Assuming only one user with the email exists
     user_country = user["country"].lower()
     user_level = user["level"].lower()
@@ -58,16 +52,17 @@ def get_scholarships():
     # Fetch all scholarships
     scholarships_response = supabase.table("scholarships").select("*").execute()
     if not scholarships_response.data:
-        return jsonify({"error": "No scholarships found"}), 404
-    
+        raise HTTPException(status_code=404, detail="No scholarships found")
+
     scholarships = scholarships_response.data
 
     # Filter scholarships based on user country, level, and interests
     matches = []
     added = set()  # To avoid duplicates
-    BATCH_SIZE = 3  # Number of scholarships to process in one batch
+    BATCH_SIZE = 2  # Number of scholarships to process in one batch
 
     for batch in chunk_list(scholarships, BATCH_SIZE):
+        tasks = []
         for sch in batch:
             if not sch.get("country_tags") or not sch.get("level_tags") or not sch.get("field_tags"):
                 continue # Skip scholarships without tags
@@ -78,23 +73,20 @@ def get_scholarships():
             if sch_name in added:
                 continue
 
-            try:
-                if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
-                    added.add(sch_name)
-                    matches.append(format_scholarship(sch))
-            except Exception as e:
-                print(f"Error processing scholarship {sch_name}: {e}")
-        
-        #pause after each batch to avoid rate limiting
-        time.sleep(10)
-        gc.collect() # Free up memory after each batch
+            tasks.append(process_scholarship(sch, user_country, user_level, user_interests, matches, added))
+
+        # Process all tasks concurrently
+        await asyncio.gather(*tasks)
+        # Sleep to avoid rate limiting
+        await asyncio.sleep(20)
+
     if not matches:
-        return jsonify({"message": "No matching scholarships found"}), 404
-    
-    return jsonify({"scholarships": matches}), 200
+        raise HTTPException(status_code=404, detail="No matching scholarships found")
+
+    raise HTTPException(status_code=200, detail={"scholarships": matches})
 
 
-def ai_scholarship_match(user_country, user_level, user_interests, description):
+async def process_scholarship(sch, user_country, user_level, user_interests, matches, added):
     try:
         prompt = f"""
 User Profile:
@@ -102,20 +94,17 @@ User Profile:
 - Level: {user_level}
 - Interests: {', '.join(user_interests)}
 Scholarship Description:
-{description}
+{sch['description']}
 
 Question: 
 Is this scholarship suitable for this user? Respond only with "YES" or "NO".
 """
         response = analyze_scholarship_with_grok(prompt)
-        print(f"AI Response: {response}")  # Debugging line to see the AI response
-        return "YES" in response.upper()
+        if "YES" in response.upper():
+            added.add(sch["name"].lower())
+            matches.append(format_scholarship(sch))
     except Exception as e:
-        if "rate limit" in str(e).lower():
-            print("Rate limit exceeded, retrying after 5 seconds...")
-            time.sleep(15)
-        print(f"AI Matching Error: {str(e)}")
-        return False
+        print(f"Error processing {sch.get('name')}: {e}")
     
 def format_scholarship(sch):
     return {

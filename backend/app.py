@@ -1,30 +1,33 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from supabase import create_client, Client
-from routes import routes
+from routes import routes  # This should be a FastAPI APIRouter
 
-from flask_cors import CORS
-
-
-## Load environment variables
+# Load environment variables
 load_dotenv()
 
-## Initialize Supabase client
+# Initialize Supabase client
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
+app = FastAPI()
 
-# Register Blueprint
-app.register_blueprint(routes)
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.route('/')
-def index():
-    return jsonify({"message": "Welcome to the Scholarship AI Agent Backend!"})
+# Register API routes (FastAPI router)
+app.include_router(routes)
 
-if __name__ == '__main__':
-    port = int(os.getenv("PORT", 5000))
-    app.run(debug=True)
+# Root endpoint
+@app.get("/")
+async def index():
+    return {"message": "Welcome to the Scholarship AI Agent Backend!"}

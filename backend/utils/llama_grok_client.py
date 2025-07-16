@@ -16,7 +16,7 @@ def analyze_scholarship_with_grok(prompt_text):
             {"role": "system", "content": "You are a helpful assistant that analyzes scholarship descriptions to determine suitability for users"},
             {"role": "user", "content": prompt_text}
         ],
-        "max_tokens": 1000,
+        "max_tokens": 100,
         "temperature": 0.0
     }
     headers = {
