@@ -67,7 +67,7 @@ async function renderScholarships()  {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
                   </svg>
               </a>
-              <p class= "scholarship-deadline">Deadline: ${new Date(scholarship.deadline).toLocaleDateString()}</p>
+              <p class= "scholarship-deadline">Deadline: ${scholarship.deadline.toLocaleDateString()}</p>
               <p class="scholarship-description">${scholarship.description.substring(0,800)}...</p>
               <div class="scholarship-tags">
                   <span class="tag recommended">Recommended</span>

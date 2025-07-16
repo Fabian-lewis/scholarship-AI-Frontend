@@ -73,15 +73,15 @@ def get_scholarships():
         if sch_name in added:
             continue  # Skip duplicates
 
-        # Match logic: at least one match in each category
-        country_match = user_country in [c.lower() for c in sch["country_tags"]]
-        level_match = user_level in [l.lower() for l in sch["level_tags"]]
-        field_match = any(f.lower() in user_interests for f in sch["field_tags"])
+        # # Match logic: at least one match in each category
+        # country_match = user_country in [c.lower() for c in sch["country_tags"]]
+        # level_match = user_level in [l.lower() for l in sch["level_tags"]]
+        # field_match = any(f.lower() in user_interests for f in sch["field_tags"])
 
-        if country_match or level_match and field_match:
-            added.add(sch_name)
-            matches.append(format_scholarship(sch))
-            continue
+        # if country_match or level_match and field_match:
+        #     added.add(sch_name)
+        #     matches.append(format_scholarship(sch))
+        #     continue
 
         ## AI Matching Logic
         if ai_scholarship_match(user_country, user_level, user_interests, sch["description"]):
