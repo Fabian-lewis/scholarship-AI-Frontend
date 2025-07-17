@@ -16,7 +16,7 @@ submitBtn.innerHTML = `
 `;
 
 // Simulate form submission
-await new Promise(resolve => setTimeout(resolve, 1500));
+await new Promise(resolve => setTimeout(resolve, 5500)); // 
 
 // Get form data
 const data = {
