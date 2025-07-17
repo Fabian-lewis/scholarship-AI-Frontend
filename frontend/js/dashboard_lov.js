@@ -38,6 +38,12 @@ async function renderScholarships()  {
   const url = `https://scholarship-ai-backend-ny79.onrender.com/scholarships?email=${email}`;
 
   const container = document.getElementById('scholarshipsList');
+  const loadingIndicator = document.getElementById('loadingIndicator');
+
+  // Show loading indicator
+  loadingIndicator.style.display = 'block';
+  container.innerHTML = ''; // Clear previous content
+
 
   try {
       const response = await fetch(url);
@@ -82,9 +88,20 @@ async function renderScholarships()  {
       const stats = document.getElementById('totalMatches');
       stats.innerHTML = `<p> ${scholarships.length}</p>`;
 
+      const matchScore = document.getElementById('matchScore');
+      // Random match score for demo between 90% and 100%
+      matchScore.innerHTML = `<p>${Math.floor(Math.random() * 11) + 90}%</p>`;
+      // Random new scholarships this week
+      const newThisWeek = document.getElementById('newThisWeek');
+      newThisWeek.innerHTML = `<p>${Math.floor(Math.random() * 5) + 1}</p>`;
+
   } catch (error) {
       console.error("Error fetching scholarships:", error);
       container.innerHTML = "<p class='error'>Failed to load scholarships. Please try again later.</p>";
+  }
+  finally {
+      // Hide loading indicator
+      loadingIndicator.style.display = 'none';
   }
   
   
