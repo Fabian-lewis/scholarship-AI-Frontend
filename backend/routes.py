@@ -78,13 +78,12 @@ async def get_scholarships(email: str = Query(...)): # Email is required as a qu
         # Process all tasks concurrently
         await asyncio.gather(*tasks)
         # Sleep to avoid rate limiting
-        await asyncio.sleep(20)
+        await asyncio.sleep(5)
 
     if not matches:
         raise HTTPException(status_code=404, detail="No matching scholarships found")
 
-    raise HTTPException(status_code=200, detail={"scholarships": matches})
-
+    return {"scholarships": matches}
 
 async def process_scholarship(sch, user_country, user_level, user_interests, matches, added):
     try:

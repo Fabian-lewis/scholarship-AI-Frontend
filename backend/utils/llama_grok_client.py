@@ -4,7 +4,7 @@ import os
 ## Load the API KEY from the environment variable
 GROK_API_KEY = os.getenv("GROK_API_KEY")
 GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
-LLAMA_MODEL = "llama3-8b-8192"  # You can change to "mixtral-8x7b-32768"
+LLAMA_MODEL =  "gemma2-9b-it" #"llama3-8b-8192"  # You can change to "mixtral-8x7b-32768"
 
 def analyze_scholarship_with_grok(prompt_text):
     if not GROK_API_KEY:
@@ -16,7 +16,7 @@ def analyze_scholarship_with_grok(prompt_text):
             {"role": "system", "content": "You are a helpful assistant that analyzes scholarship descriptions to determine suitability for users"},
             {"role": "user", "content": prompt_text}
         ],
-        "max_tokens": 100,
+        "max_tokens": 10,
         "temperature": 0.0
     }
     headers = {
