@@ -166,7 +166,7 @@ def scrape_post_detail(post_url):
 
     # Search for phrases that include "deadline" or similar
     for s in (content_el.stripped_strings if content_el else []):
-        if any(k in s.lower() for k in ["deadline", "apply by", "closing date", "last date"]):
+        if any(k in s.lower() for k in ["deadline", "apply by", "closing date", "last date", "application deadline"]):
             possible_lines.append(s)
 
     # Try parsing date from those lines
@@ -176,14 +176,21 @@ def scrape_post_detail(post_url):
             deadline = parsed.date().isoformat()
             break
 
-    # Fallback: find any date-like string in the whole text
+    # --- Regex fallback ---
     if not deadline:
-        date_like = re.search(r"([A-Za-z]{3,9}\s+\d{1,2},?\s*\d{4})", description)
-        if date_like:
-            parsed = dateparser.parse(date_like.group(0))
-            if parsed:
-                deadline = parsed.date().isoformat()
-                
+        # Handles both "31 January 2026" and "January 31, 2026"
+        date_patterns = [
+            r"\b(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})\b",
+            r"\b([A-Za-z]{3,9}\s+\d{1,2},?\s*\d{4})\b",
+        ]
+        for pattern in date_patterns:
+            match = re.search(pattern, all_text)
+            if match:
+                parsed = dateparser.parse(match.group(0), settings={"PREFER_DATES_FROM": "future"})
+                if parsed:
+                    deadline = parsed.date().isoformat()
+                    break
+
     result = {
         "title": title,
         "provider": provider,        # Could be parsed from tags or content later

@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from utils.supabase_client import supabase
 from utils.llama_grok_client import analyze_scholarship_with_grok
 import asyncio
+from pathlib import Path
 
 
 
@@ -120,3 +121,45 @@ def chunk_list(data, chunk_size):
     """Yield successive n-sized chunks from data."""
     for i in range(0, len(data), chunk_size):
         yield data[i:i + chunk_size]
+
+
+
+# ==== Upload scholarships to database ====
+@routes.post("/upload_scholarships")
+async def upload_scholarships(request: Request):
+    """Upload scraped scholarship data to Supabase."""
+    try:
+        data = await request.json()
+        if not isinstance(data, list):
+            raise HTTPException(status_code=400, detail="Expected a list of scholarship objects")
+        
+        inserted = []
+
+        for item in data:
+            # Validate required fields
+            if not all(k in item for k in ["title", "origin_url", "description"]):
+                continue # Skip incomplete entries
+
+            try:
+                response = supabase.table("scholarships").insert({
+                    "name": item.get("title"),
+                    "description": item.get("description"),
+                    "provider": item.get("provider"),
+                    "level_tags": item.get("level"),
+                    "country_tags": item.get("country"),
+                    "amount" : item.get("amount"),
+                    "posted_at": item.get("published"),
+                    "source": item.get("source"),
+                    "link": item.get("origin_url"),
+                    "deadline": item.get("deadline"),
+                    "field_tags": item.get("field")
+                }).execute()
+                inserted.append(response.data)
+            
+            except Exception as e:
+                print(f"Error inserting record: {e}")
+        
+        return {"message": f"Uploaded {len(inserted)} scholarships successfully."}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
