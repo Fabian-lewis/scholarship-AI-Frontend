@@ -65,23 +65,23 @@ id, user_id, scholarship_id, action (saved/applied/viewed), created_at
 scholarship_ai_agent/
 │
 ├── backend/
-│   ├── app.py                       # FastAPI app entrypoint
-│   ├── routes.py                    # APIRouter with endpoints
+│   ├── app.py                     # FastAPI app entrypoint
+│   ├── routes.py                  # APIRouter with endpoints
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   ├── utils/
 │   │   ├── __init__.py
-│   │   ├── supabase_client.py       # supabase wrapper (init client + helper functions)
-│   │   ├── llama_grok_client.py     # LLM wrapper (analyze_scholarship_with_grok)
-│   │   ├── db_helpers.py            # helpers for inserts/queries, dedupe, bulk upsert
+│   │   ├── supabase_client.py     # supabase wrapper (init client + helper functions)
+│   │   ├── llama_grok_client.py   # LLM wrapper (analyze_scholarship_with_grok)
+│   │   ├── db_helpers.py          # helpers for inserts/queries, dedupe, bulk upsert
 │   │   └── logger.py
 │   └── tests/
 │       └── test_routes.py
 │
 ├── scraper/
-│   ├── main.py                      # orchestrates scrapers, dedupe, saves JSON, optionally POSTs to backend
+│   ├── main.py                    # orchestrates scrapers, dedupe, saves JSON, optionally POSTs to backend
 │   ├── requirements.txt
-│   ├── data/                         # saved JSONs (gitignored)
+│   ├── data/                      # saved JSONs (gitignored)
 │   │   └── opportunitiesforafricans_YYYYMMDD.json
 │   ├── sources/
 │   │   ├── __init__.py
@@ -94,13 +94,42 @@ scholarship_ai_agent/
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   ├── lib/
-│   │   │   └── api.ts               # calls backend endpoints
-│   │   └── main.tsx
-│   ├── package.json
-│   └── vite.config.ts
+│   ├── api/                 # 🔌 All API calls (connects to FastAPI)
+│   │   ├── index.ts
+│   │   └── user.ts
+│   │   └── scholarships.ts
+│   │
+│   ├── components/            # 🧩 Reusable UI components
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Loader.tsx
+│   │   ├── ScholarshipCard.tsx
+│   │   └── FormInput.tsx
+│   │
+│   ├── pages/                # 📄 App pages (routed via React Router)
+│   │   ├── Home.tsx
+│   │   ├── Register.tsx
+│   │   ├── Scholarships.tsx
+│   │   ├── ScholarshipDetail.tsx
+│   │   ├── About.tsx
+│   │   └── NotFound.tsx
+│   │
+│   ├── hooks/               # 🪝 Custom React hooks
+│   │   └── useFetch.ts
+│   │
+│   ├── context/             # 🌐 App-wide state (auth, user)
+│   │   └── UserContext.tsx
+│   │
+│   ├── styles/              # 🎨 Tailwind extensions or custom CSS
+│   │   └── globals.css
+│   │
+│   ├── utils/               # ⚙️ Helpers (formatting, constants)
+│   │   ├── formatDate.ts
+│   │   └── constants.ts
+│   │
+│   ├── App.tsx              # 🚀 Main app entry (routes defined here)
+│   ├── main.tsx             # React root
+│   └── vite-env.d.ts
 │
 ├── infra/
 │   ├── docker-compose.yml

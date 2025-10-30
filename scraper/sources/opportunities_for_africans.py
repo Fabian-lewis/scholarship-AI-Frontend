@@ -164,12 +164,18 @@ def scrape_post_detail(post_url):
     deadline = None
     possible_lines = []
 
-    # Search for phrases that include "deadline" or similar
-    for s in (content_el.stripped_strings if content_el else []):
+    # Combine all text sources
+    all_text = " ".join([
+        description or "",
+        " ".join(content_el.stripped_strings) if content_el else ""
+    ])
+
+    # Search for phrases that mention deadlines
+    for s in all_text.splitlines():
         if any(k in s.lower() for k in ["deadline", "apply by", "closing date", "last date", "application deadline"]):
             possible_lines.append(s)
 
-    # Try parsing date from those lines
+    # Try to parse directly from those lines
     for phrase in possible_lines:
         parsed = dateparser.parse(phrase, settings={"PREFER_DATES_FROM": "future"})
         if parsed:

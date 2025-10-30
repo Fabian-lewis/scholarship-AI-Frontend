@@ -138,6 +138,7 @@ async def upload_scholarships(request: Request):
         for item in data:
             # Validate required fields
             if not all(k in item for k in ["title", "origin_url", "description"]):
+                print("Skipping incomplete item:", {k: item.get(k) for k in ["title", "origin_url", "description"]})
                 continue # Skip incomplete entries
 
             try:
@@ -160,6 +161,37 @@ async def upload_scholarships(request: Request):
                 print(f"Error inserting record: {e}")
         
         return {"message": f"Uploaded {len(inserted)} scholarships successfully."}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ====== Get Recent Scholarships =====
+@routes.get("/scholarships/recent")
+async def get_recent_scholarships(limit: int=Query(10, ge=1, le=100)):
+    """
+    Return the most recently posted scholarships
+    Query param: ?limit=10
+    """
+
+    try:
+        resp = (
+            supabase.table("scholarships")
+            .select(
+                "id,name,provider,deadline,posted_at,link,description,"
+                "field_tags,country_tags,level_tags,amount,source"
+            )
+            .order("posted_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+
+        # Handle possible empty or bad response
+        data = getattr(resp, "data", None)
+        if not data:
+            raise HTTPException(status_code=404, detail="No scholarships found")
+
+        return {"scholarships": data}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
