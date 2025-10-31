@@ -1,18 +1,10 @@
+// frontend/src/components/ScholarshipCard.tsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, Bookmark } from "lucide-react";
 
-interface Scholarship {
-  id: number;
-  title: string;
-  provider: string;
-  amount: string;
-  deadline: string;
-  matchScore: number;
-  description: string;
-  eligibility: string;
-}
+import { Scholarship } from "@/api/scholarships";
 
 interface ScholarshipCardProps {
   scholarship: Scholarship;
@@ -41,15 +33,15 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
             <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-              {scholarship.title}
+              {scholarship.name}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">{scholarship.provider}</p>
           </div>
           <Badge 
             variant="outline" 
-            className={`${getMatchScoreColor(scholarship.matchScore)} border-current shrink-0`}
+            className={`${getMatchScoreColor(80)} border-current shrink-0`} // Add matscore functionality
           >
-            {scholarship.matchScore}% Match
+            {scholarship.source} Match
           </Badge>
         </div>
       </CardHeader>
@@ -69,7 +61,7 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
         </div>
         <div className="pt-2">
           <Badge variant="secondary" className="text-xs">
-            {scholarship.eligibility}
+            {scholarship.field_tags}
           </Badge>
         </div>
       </CardContent>
