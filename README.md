@@ -1,66 +1,53 @@
-###
-Supabase table schemas (recommended)
+## 🎓 Scholarship AI
+Scholarship AI is an intelligent platform that helps students discover, apply for, and manage scholarships effortlessly through personalized AI assistance.
+It leverages machine learning and natural language understanding to match users with relevant opportunities, streamline application workflows, and provide guidance throughout the scholarship journey.
 
-Create these tables in Supabase (SQL or dashboard). I’ll include core columns and suggested types.
+### 🚀 Overview
 
-users
+Finding scholarships can be overwhelming — scattered opportunities, lengthy forms, and eligibility confusion.
+Scholarship AI simplifies this process by acting as your personal scholarship assistant:
 
-id (uuid) — primary key (default gen_random_uuid())
+-- Discover relevant scholarships using AI-driven recommendations.
+-- Manage deadlines and applications in one place.
+-- Receive tailored feedback on essays, eligibility, and next steps.
+-- Learn strategies to improve your chances — directly from the assistant.
 
-name (text)
+### 🧩 Tech Stack
 
-email (text) — unique
+| Layer            | Technologies                                                         |
+| ---------------- | -------------------------------------------------------------------- |
+| **Frontend**     | React, TypeScript, TailwindCSS, shadcn/ui, React Query, React Router |
+| **Backend**      | Node.js / Express (planned), integrated with OpenAI API              |
+| **Database**     | Supabase (auth + data)                                               |
+| **AI Layer**     | GPT-based scholarship discovery, essay review, and chat guidance     |
+| **State & Data** | React Query, Context API                                             |
+| **Routing**      | React Router DOM                                                     |
 
-country (text)
 
-level (text) — e.g., "Undergraduate", "Postgraduate"
+### 🛠️ Installation
+1. Clone the repository
+```
+git clone https://github.com/Fabian-lewis/scholarship-AI-Frontend
+cd scholarship-AI-Frontend
 
-interests (text[]) — array of keywords
+```
+2. Install dependencies
+```
+npm install
 
-created_at (timestamp) — default now()
+```
+3. Create your environment file
+```
+cp .env.example .env
 
-scholarships
+```
+4. Run the development server
+```
+npm run dev
 
-id (uuid) — primary key
+```
 
-name (text)
-
-origin_url (text) — unique index (source post page)
-
-link (text) — application link (external)
-
-description (text)
-
-provider (text)
-
-amount (text)
-
-deadline (date)
-
-published (date)
-
-country_tags (text[]) — country/region list
-
-level_tags (text[]) — levels (Undergraduate, Postgraduate, PhD)
-
-field_tags (text[]) — subject fields
-
-tags (text[]) — raw tags from post
-
-source (text) — site domain
-
-created_at (timestamp) — default now()
-
-embedding (vector) — optional (if using vector search)
-
-Add indices on origin_url (unique) and deadline (for sorting).
-
-user_interactions (optional)
-
-id, user_id, scholarship_id, action (saved/applied/viewed), created_at
-
-###
-
+### 📁 Folder Structure
 ```
 scholarship_ai_agent/
 │
@@ -140,3 +127,58 @@ scholarship_ai_agent/
 └── LICENSE
 
 ```
+
+### 📊 Database Schema (Supabase)
+
+Create these tables in Supabase using SQL or the dashboard.
+Below are the core tables and recommended fields.
+
+```
+🧍‍♀️ users
+
+| Column       | Type        | Notes                                 |
+| ------------ | ----------- | ------------------------------------- |
+| `id`         | `uuid`      | Primary key (`gen_random_uuid()`)     |
+| `name`       | `text`      |                                       |
+| `email`      | `text`      | Unique                                |
+| `country`    | `text`      |                                       |
+| `level`      | `text`      | e.g., "Undergraduate", "Postgraduate" |
+| `interests`  | `text[]`    | Array of keywords                     |
+| `created_at` | `timestamp` | Default `now()`                       |
+
+
+🎓 scholarships
+| Column         | Type        | Notes                                     |
+| -------------- | ----------- | ----------------------------------------- |
+| `id`           | `uuid`      | Primary key                               |
+| `name`         | `text`      |                                           |
+| `origin_url`   | `text`      | Unique index (source post page)           |
+| `link`         | `text`      | Application link (external)               |
+| `description`  | `text`      |                                           |
+| `provider`     | `text`      |                                           |
+| `amount`       | `text`      |                                           |
+| `deadline`     | `date`      |                                           |
+| `published`    | `date`      |                                           |
+| `country_tags` | `text[]`    | List of eligible countries/regions        |
+| `level_tags`   | `text[]`    | Levels (Undergraduate, Postgraduate, PhD) |
+| `field_tags`   | `text[]`    | Subject or discipline tags                |
+| `tags`         | `text[]`    | Raw extracted tags                        |
+| `source`       | `text`      | Origin site domain                        |
+| `created_at`   | `timestamp` | Default `now()`                           |
+| `embedding`    | `vector`    | Optional (for vector search)              |
+
+
+📈 user_interactions (optional)
+| Column           | Type        | Notes                                    |
+| ---------------- | ----------- | ---------------------------------------- |
+| `id`             | `uuid`      | Primary key                              |
+| `user_id`        | `uuid`      | Foreign key → `users.id`                 |
+| `scholarship_id` | `uuid`      | Foreign key → `scholarships.id`          |
+| `action`         | `text`      | e.g., `"saved"`, `"applied"`, `"viewed"` |
+| `created_at`     | `timestamp` | Default `now()`                          |
+
+```
+
+
+###
+
