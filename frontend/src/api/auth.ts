@@ -7,10 +7,28 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ------ Auth Functions ------
-export async function signUp(email: string, password: string){
+export async function signUp(email: string, password: string, firstName: string, lastName: string){
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
-    return data;
+
+    // If signup succeeded, also insert into your `users` table
+  if (data.user) {
+    const { error: insertError } = await supabase
+      .from("users")
+      .insert([
+        {
+          id: data.user.id, // keep the id consistent with Supabase Auth user
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          onboarded: false, // we'll use this flag later
+        },
+      ]);
+
+    if (insertError) throw insertError;
+  }
+
+  return data;
 }
 
 export async function signIn(email: string, password: string) {

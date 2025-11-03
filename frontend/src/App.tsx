@@ -11,7 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import SavedScholarships from "./pages/SavedScholarships";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,10 +24,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/saved" element={<SavedScholarships />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/onboarding" element={<ProtectedRoute requireOnboarding={true}><Onboarding /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/saved" element={<ProtectedRoute><SavedScholarships /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

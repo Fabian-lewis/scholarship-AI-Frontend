@@ -6,15 +6,38 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GraduationCap, Mail, Lock } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {signIn, signUp, user} = useAuth();
+
+  const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
-    // Auth logic will be implemented when Supabase is enabled
-    setTimeout(() => setIsLoading(false), 1000);
+    // Auth logic
+    try{
+      await signIn(email, password);
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast.error("Invalid email or password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (email: string, password: string, firstName: string, lastName: string) => {
+    setIsLoading(true);
+    try{
+      await signUp(email, password, firstName, lastName);
+      toast.success("Account created successfully!");
+    } catch (error) {
+      console.error("Signup failed:", error);
+      toast.error("Email already in use");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,7 +108,14 @@ const Auth = () => {
                       Sign in to your account to continue your scholarship search
                     </CardDescription>
                   </CardHeader>
-                  <form onSubmit={handleSubmit}>
+                  <form 
+                    onSubmit={(e) =>{
+                      e.preventDefault();
+                      const email = (e.currentTarget.elements.namedItem("email") as HTMLInputElement).value;
+                      const password = (e.currentTarget.elements.namedItem("password") as HTMLInputElement).value;
+                      handleLogin(email, password);
+                    }}
+                  >
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
@@ -171,7 +201,16 @@ const Auth = () => {
                       Start finding scholarships that match your profile
                     </CardDescription>
                   </CardHeader>
-                  <form onSubmit={handleSubmit}>
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const firstName = (e.currentTarget.elements.namedItem("firstName") as HTMLInputElement).value;
+                      const lastName = (e.currentTarget.elements.namedItem("lastName") as HTMLInputElement).value;
+                      const email = (e.currentTarget.elements.namedItem("signup-email") as HTMLInputElement).value;
+                      const password = (e.currentTarget.elements.namedItem("signup-password") as HTMLInputElement).value;
+                      handleSignup(email, password, firstName, lastName);
+                    }}
+                  >
                     <CardContent className="space-y-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
