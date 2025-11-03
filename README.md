@@ -7,10 +7,10 @@ It leverages machine learning and natural language understanding to match users 
 Finding scholarships can be overwhelming — scattered opportunities, lengthy forms, and eligibility confusion.
 Scholarship AI simplifies this process by acting as your personal scholarship assistant:
 
--- Discover relevant scholarships using AI-driven recommendations.
--- Manage deadlines and applications in one place.
--- Receive tailored feedback on essays, eligibility, and next steps.
--- Learn strategies to improve your chances — directly from the assistant.
+- Discover relevant scholarships using AI-driven recommendations.
+- Manage deadlines and applications in one place.
+- Receive tailored feedback on essays, eligibility, and next steps.
+- Learn strategies to improve your chances — directly from the assistant.
 
 ### 🧩 Tech Stack
 
@@ -148,6 +148,7 @@ Below are the core tables and recommended fields.
 
 
 🎓 scholarships
+
 | Column         | Type        | Notes                                     |
 | -------------- | ----------- | ----------------------------------------- |
 | `id`           | `uuid`      | Primary key                               |
@@ -169,6 +170,7 @@ Below are the core tables and recommended fields.
 
 
 📈 user_interactions (optional)
+
 | Column           | Type        | Notes                                    |
 | ---------------- | ----------- | ---------------------------------------- |
 | `id`             | `uuid`      | Primary key                              |
@@ -180,5 +182,25 @@ Below are the core tables and recommended fields.
 ```
 
 
-###
+### 🧠 AI Capabilities
 
+- Scholarship AI uses GPT-based reasoning and structured prompts to:
+- Understand user goals and eligibility
+- Rank scholarships based on fit and priority
+- Offer essay and application feedback
+- Help draft personalized statements
+
+### 🤝 Contributing
+
+Contributions are welcome!
+To contribute:
+
+1. Fork this repo
+2. Create a new branch (feature/your-feature-name)
+3. Commit and push your changes
+4. Open a Pull Request
+
+### 🧾 License
+
+This project is licensed under the MIT License — see the LICENSE
+ file for details.
