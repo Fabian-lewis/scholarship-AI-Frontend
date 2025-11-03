@@ -11,39 +11,6 @@ const Landing = () => {
 
   // Mock scholarship data
 
-  // const featuredScholarships = [
-  //   {
-  //     id: 1,
-  //     title: "Global Excellence Scholarship",
-  //     provider: "International Education Fund",
-  //     amount: "$25,000",
-  //     deadline: "2025-03-15",
-  //     matchScore: 92,
-  //     description: "For outstanding students pursuing STEM degrees worldwide",
-  //     eligibility: "Undergraduate, GPA 3.5+",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Future Leaders Program",
-  //     provider: "Tech Innovation Foundation",
-  //     amount: "$15,000",
-  //     deadline: "2025-04-01",
-  //     matchScore: 87,
-  //     description: "Supporting the next generation of tech innovators",
-  //     eligibility: "Computer Science majors",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Women in Engineering Grant",
-  //     provider: "Engineering Excellence Network",
-  //     amount: "$20,000",
-  //     deadline: "2025-03-30",
-  //     matchScore: 85,
-  //     description: "Empowering women pursuing engineering degrees",
-  //     eligibility: "Female students, Engineering",
-  //   },
-  // ];
-
   const [featuredScholarships, setScholarships] = useState<Scholarship[]>([]);
   const [loading, setLoading] = useState(true);
 
