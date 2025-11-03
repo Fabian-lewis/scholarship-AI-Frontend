@@ -52,7 +52,7 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <DollarSign className="h-4 w-4 text-success" />
-            <span className="font-semibold text-success">{scholarship.amount}</span>
+            <span className="font-semibold text-success">{scholarship.amount || "Not Listed"}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
@@ -61,7 +61,7 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
         </div>
         <div className="pt-2">
           <Badge variant="secondary" className="text-xs">
-            {scholarship.field_tags}
+            {[scholarship.field_tags||"Field Not listed",",", scholarship.level_tags || "Level Not Listed"]}
           </Badge>
         </div>
       </CardContent>
