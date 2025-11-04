@@ -8,26 +8,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // ------ Auth Functions ------
 export async function signUp(email: string, password: string, firstName: string, lastName: string){
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    // Store first_name, last_name, and an onboarded: false flag in Supabase’s user_metadata.
+    options: {
+      data: { first_name: firstName, last_name: lastName, onboarded: false },
+      //emailRedirectTo: `${window.location.origin}/onboarding`, // Redirect to onboarding page after signup
+    },
+  });
 
-    // If signup succeeded, also insert into your `users` table
-  if (data.user) {
-    const { error: insertError } = await supabase
-      .from("users")
-      .insert([
-        {
-          id: data.user.id, // keep the id consistent with Supabase Auth user
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          onboarded: false, // we'll use this flag later
-        },
-      ]);
-
-    if (insertError) throw insertError;
-  }
-
+  if (error) throw error;
   return data;
 }
 

@@ -1,38 +1,49 @@
 ## Route Handlers for the backend
 # File: backend/routes.py
 from fastapi import APIRouter, HTTPException, Query, Request
-from utils.supabase_client import supabase
+from utils.supabase_client import supabase, supabase_admin
 from utils.llama_grok_client import analyze_scholarship_with_grok
 import asyncio
 from pathlib import Path
+from models.userProfile import UserProfile
+from datetime import datetime
 
 
 
 routes = APIRouter()
 
-## Register Route to handle user registration
-@routes.post('/register')
-async def register(request: Request):
-    data = await request.json()
-    name = data.get("name")
-    email = data.get("email")
-    country = data.get("country")
-    level = data.get("level")
-    interests = data.get("interests")
-
-    if not all([name, email, country, level, interests]):
-        raise HTTPException(status_code=400, detail="Missing required fields")
-
+## Register Route to handle user registration and onboarding
+@routes.post('/users/onboarding')
+async def save_onboarding(profile: UserProfile):
     try:
-        result = supabase.table("users").insert({
-            "name": name,
-            "email": email,
-            "country": country,
-            "level": level,
-            "interests": interests
-        }).execute()
-        return {"message": "User registered successfully", "data": result.data}
+        data = {
+            "id": profile.id,
+            "first_name": profile.first_name,
+            "last_name": profile.last_name,
+            "email": profile.email,
+            "country": profile.country,
+            "level": profile.level,
+            "interests": profile.interests,
+            "goals": profile.goals,
+            "onboarded": profile.onboarded,
+            "created_at": datetime.utcnow().isoformat(),
+        }
+
+        #print("🧠 Data being saved:", data)
+        response = supabase.table("users").upsert(data).execute()
+
+        if getattr(response, "error", None):
+            raise HTTPException(status_code=400, detail=response.error.message)
+
+        # ✅ Update Supabase Auth user metadata
+        supabase_admin.auth.admin.update_user_by_id(profile.id, {
+            "user_metadata": {"onboarded": True}
+        })
+
+        return {"message": "user Profile saved successfully", "data": response.data}
+    
     except Exception as e:
+        #print("🔥 Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 ## Route to get scholarships based on user interests

@@ -17,7 +17,7 @@ Scholarship AI simplifies this process by acting as your personal scholarship as
 | Layer            | Technologies                                                         |
 | ---------------- | -------------------------------------------------------------------- |
 | **Frontend**     | React, TypeScript, TailwindCSS, shadcn/ui, React Query, React Router |
-| **Backend**      | Node.js / Express (planned), integrated with OpenAI API              |
+| **Backend**      | Python, Fast API, integrated with OpenAI API              |
 | **Database**     | Supabase (auth + data)                                               |
 | **AI Layer**     | GPT-based scholarship discovery, essay review, and chat guidance     |
 | **State & Data** | React Query, Context API                                             |

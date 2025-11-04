@@ -31,7 +31,7 @@ const Auth = () => {
     setIsLoading(true);
     try{
       await signUp(email, password, firstName, lastName);
-      toast.success("Account created successfully!");
+      toast.success("Confirm your email to continue!");
     } catch (error) {
       console.error("Signup failed:", error);
       toast.error("Email already in use");

@@ -1,3 +1,4 @@
+// frontend/src/pages/Onboarding.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, ArrowRight, ArrowLeft } from "lucide-react";
+import { saveUserProfile } from "@/api/onboarding";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const Onboarding = () => {
+
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
@@ -42,12 +48,38 @@ const Onboarding = () => {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Save profile and navigate to dashboard
-      navigate("/dashboard");
+      try{
+         // Save profile and navigate to dashboard
+        if (!user) {
+          toast.error(" You need to sign up first.");
+          throw new Error("User not found");
+        }
+
+        await saveUserProfile({
+          id: user.id,
+          first_name: user.user_metadata.first_name,
+          last_name: user.user_metadata.last_name,
+          email: user.email,
+          country: formData.country,
+          level: formData.educationLevel,
+          interests: formData.fieldsOfInterest,
+          goals: formData.goals,
+        });
+
+
+
+        toast.success("Profile saved successfuly");
+        
+        //navigate("/dashboard");
+      } catch (error) {
+        console.error("Error Saving profile:", error);
+        toast.error("Something went wrong while saving your profile. Please try again.");
+      }
+     
     }
   };
 
