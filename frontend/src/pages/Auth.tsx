@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,8 @@ import { toast } from "sonner";
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
+  const navigate = useNavigate()
+
   const {signIn, signUp, user} = useAuth();
 
   const handleLogin = async (email: string, password: string) => {
@@ -19,6 +22,8 @@ const Auth = () => {
     // Auth logic
     try{
       await signIn(email, password);
+      toast.success(`Welcome back🎉 We missed you ${user.user_metadata.first_name}🎉🎉`);
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Invalid email or password");
