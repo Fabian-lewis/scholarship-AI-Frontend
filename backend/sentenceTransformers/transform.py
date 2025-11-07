@@ -4,8 +4,8 @@ from transformers import pipeline
 from fastapi import HTTPException
 
 # ✅ Load models once (not every time)
-embedding_model = SentenceTransformer("intfloat/e5-base-v2")
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 def safe_summarize(text: str) -> str:
     """Summarize long text safely by chunking."""
