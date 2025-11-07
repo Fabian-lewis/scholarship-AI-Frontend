@@ -1,77 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScholarshipCard } from "@/components/ScholarshipCard";
 import { GraduationCap, Search, Filter, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext"
+import { getRecentScholarships, Scholarship } from "@/api/scholarships";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
 
-  const scholarships = [
-    {
-      id: 1,
-      title: "Global Excellence Scholarship",
-      provider: "International Education Fund",
-      amount: "$25,000",
-      deadline: "2025-03-15",
-      matchScore: 92,
-      description: "For outstanding students pursuing STEM degrees worldwide",
-      eligibility: "Undergraduate, GPA 3.5+",
-    },
-    {
-      id: 2,
-      title: "Future Leaders Program",
-      provider: "Tech Innovation Foundation",
-      amount: "$15,000",
-      deadline: "2025-04-01",
-      matchScore: 87,
-      description: "Supporting the next generation of tech innovators",
-      eligibility: "Computer Science majors",
-    },
-    {
-      id: 3,
-      title: "Women in Engineering Grant",
-      provider: "Engineering Excellence Network",
-      amount: "$20,000",
-      deadline: "2025-03-30",
-      matchScore: 85,
-      description: "Empowering women pursuing engineering degrees",
-      eligibility: "Female students, Engineering",
-    },
-    {
-      id: 4,
-      title: "International Student Merit Award",
-      provider: "Global Education Alliance",
-      amount: "$18,000",
-      deadline: "2025-04-15",
-      matchScore: 83,
-      description: "Supporting international students with academic excellence",
-      eligibility: "International students, All majors",
-    },
-    {
-      id: 5,
-      title: "STEM Diversity Scholarship",
-      provider: "National Science Foundation",
-      amount: "$30,000",
-      deadline: "2025-05-01",
-      matchScore: 81,
-      description: "Promoting diversity in STEM education",
-      eligibility: "Underrepresented minorities, STEM",
-    },
-    {
-      id: 6,
-      title: "Business Leadership Grant",
-      provider: "Corporate Leaders Foundation",
-      amount: "$12,000",
-      deadline: "2025-04-20",
-      matchScore: 78,
-      description: "For aspiring business leaders and entrepreneurs",
-      eligibility: "Business majors, Graduate",
-    },
-  ];
+  const { user } = useAuth();
+  const first = user?.user_metadata?.first_name || "";
+  const last = user?.user_metadata?.last_name || "";
+  const user_name = `${first} ${last}`.trim();
+
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+
+  useEffect(() =>{
+    async function loadData(){
+      const data = await getRecentScholarships(6);
+      setScholarships(data);
+      setIsLoading(false);
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -100,7 +57,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-foreground">
-            Welcome back, Student! 👋
+            Welcome back, {user_name}👋
           </h1>
           <p className="text-muted-foreground">
             We found <span className="font-semibold text-foreground">{scholarships.length}</span> scholarships that match your profile

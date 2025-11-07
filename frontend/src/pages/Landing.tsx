@@ -12,13 +12,14 @@ const Landing = () => {
   // Mock scholarship data
 
   const [featuredScholarships, setScholarships] = useState<Scholarship[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() =>{
     async function loadData(){
+      setIsLoading(true)
       const data = await getRecentScholarships(6);
       setScholarships(data);
-      setLoading(false);
+      setIsLoading(false);
     }
     loadData();
   }, []);

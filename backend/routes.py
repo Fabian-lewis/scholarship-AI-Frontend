@@ -7,6 +7,7 @@ import asyncio
 from pathlib import Path
 from models.userProfile import UserProfile
 from datetime import datetime
+from sentenceTransformers.transform import transform
 
 
 
@@ -45,6 +46,7 @@ async def save_onboarding(profile: UserProfile):
     except Exception as e:
         #print("🔥 Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
 
 ## Route to get scholarships based on user interests
 @routes.get('/scholarships') # This is a GET request
@@ -100,16 +102,16 @@ async def get_scholarships(email: str = Query(...)): # Email is required as a qu
 async def process_scholarship(sch, user_country, user_level, user_interests, matches, added):
     try:
         prompt = f"""
-User Profile:
- - Country: {user_country}
-- Level: {user_level}
-- Interests: {', '.join(user_interests)}
-Scholarship Description:
-{sch['description']}
+                    User Profile:
+                    - Country: {user_country}
+                    - Level: {user_level}
+                    - Interests: {', '.join(user_interests)}
+                    Scholarship Description:
+                    {sch['description']}
 
-Question: 
-Is this scholarship suitable for this user? Respond only with "YES" or "NO".
-"""
+                    Question: 
+                    Is this scholarship suitable for this user? Respond only with "YES" or "NO".
+                """
         response = analyze_scholarship_with_grok(prompt)
         if "YES" in response.upper():
             added.add(sch["name"].lower())
@@ -143,37 +145,40 @@ async def upload_scholarships(request: Request):
         data = await request.json()
         if not isinstance(data, list):
             raise HTTPException(status_code=400, detail="Expected a list of scholarship objects")
-        
-        inserted = []
+
+        clean_records = []
 
         for item in data:
-            # Validate required fields
             if not all(k in item for k in ["title", "origin_url", "description"]):
-                print("Skipping incomplete item:", {k: item.get(k) for k in ["title", "origin_url", "description"]})
-                continue # Skip incomplete entries
+                print("Skipping incomplete item:", item.get("title"))
+                continue
 
-            try:
-                response = supabase.table("scholarships").insert({
-                    "name": item.get("title"),
-                    "description": item.get("description"),
-                    "provider": item.get("provider"),
-                    "level_tags": item.get("level"),
-                    "country_tags": item.get("country"),
-                    "amount" : item.get("amount"),
-                    "posted_at": item.get("published"),
-                    "source": item.get("source"),
-                    "link": item.get("origin_url"),
-                    "deadline": item.get("deadline"),
-                    "field_tags": item.get("field")
-                }).execute()
-                inserted.append(response.data)
-            
-            except Exception as e:
-                print(f"Error inserting record: {e}")
-        
-        return {"message": f"Uploaded {len(inserted)} scholarships successfully."}
+            # ✅ Create summary + embedding
+            summary, embedding = transform(item.get("description", ""))
+
+            clean_records.append({
+                "name": item.get("title"),
+                "description": summary,
+                "embedding": embedding,
+                "provider": item.get("provider"),
+                "level_tags": item.get("level"),
+                "country_tags": item.get("country"),
+                "amount": item.get("amount"),
+                "posted_at": item.get("published"),
+                "source": item.get("source"),
+                "link": item.get("origin_url"),
+                "deadline": item.get("deadline"),
+                "field_tags": item.get("field")
+            })
+
+        # ✅ Bulk insert for better performance
+        if clean_records:
+            supabase.table("scholarships").insert(clean_records).execute()
+
+        return {"message": f"Uploaded {len(clean_records)} scholarships successfully."}
 
     except Exception as e:
+        print("🔥 Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 

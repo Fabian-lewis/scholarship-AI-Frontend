@@ -3,10 +3,18 @@
 import requests
 import json
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+## Load environment variables
+load_dotenv()
+
+## Load the Bachend URL
+backend_url = os.getenv("BACKEND_URL")
 
 
 ## Define the URL
-URL = "http://127.0.0.1:8000/upload_scholarships"
+URL = f"{backend_url}/upload_scholarships"
 
 # Load your scraped JSON data
 json_path = Path("data/opportunitiesforafricans_scholarships.json")
