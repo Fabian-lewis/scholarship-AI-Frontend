@@ -1,48 +1,31 @@
-# transform.py
-from sentence_transformers import SentenceTransformer
-from transformers import pipeline
+import requests
 from fastapi import HTTPException
+import os
+from dotenv import load_dotenv
 
-# ✅ Load models once (not every time)
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+# Load env variables
+load_dotenv()
 
-def safe_summarize(text: str) -> str:
-    """Summarize long text safely by chunking."""
-    try:
-        if not text or len(text.strip()) < 100:
-            return text.strip()
-
-        # BART can only handle up to 1024 tokens (~1000–1500 chars)
-        chunk_size = 1500
-        chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-
-        summaries = []
-        for chunk in chunks:
-            try:
-                result = summarizer(
-                    chunk,
-                    max_length=300,
-                    min_length=100,
-                    do_sample=False
-                )
-                summaries.append(result[0]["summary_text"])
-            except Exception as inner_e:
-                print(f"⚠️ Skipping problematic chunk: {inner_e}")
-
-        return " ".join(summaries) if summaries else text.strip()
-
-    except Exception as e:
-        print("🔥 Summarization error:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
-
+HF_SPACE_URL = os.getenv("HF_SPACE_URL")
 
 def transform(text: str):
-    """Summarize text and generate embedding."""
     try:
-        summary = safe_summarize(text)
-        embedding = embedding_model.encode(summary, convert_to_tensor=False).tolist()
+        payload = {"text": text}
+        response = requests.post(HF_SPACE_URL, json=payload, timeout=30)
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail=f"HF space error: {response.text}")
+
+        data = response.json()
+        summary = data.get("summary")
+        embedding = data.get("embedding")
+
+        if not summary or not embedding:
+            raise HTTPException(status_code=500, detail="HF space returned invalid data")
+
         return summary, embedding
+
     except Exception as e:
         print("🔥 Unexpected error during transforming:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
+

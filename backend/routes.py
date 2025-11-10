@@ -8,7 +8,11 @@ from pathlib import Path
 from models.userProfile import UserProfile
 from datetime import datetime
 from sentenceTransformers.transform import transform
+import requests
+import numpy as np
 
+
+HF_SPACE_URL = "https://annkabura-scholar-transform-service.hf.space/embed_user"
 
 
 routes = APIRouter()
@@ -210,4 +214,50 @@ async def get_recent_scholarships(limit: int=Query(10, ge=1, le=100)):
         return {"scholarships": data}
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============ Recommend Scholarships   ========================
+@routes.get("/recommend_scholarships/{user_id}")
+async def recommend_scholarships(user_id: str):
+    try:
+        # Get User Data
+        user_res = supabase.table("users").select("*").eq("id", user_id).single().execute()
+        user = user_res.data
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # ✅ Combine text fields for embedding
+        combined_text = f"Goals: {user['goals']}. Interests: {', '.join(user['interests']) if isinstance(user['interests'], list) else user['interests']}."
+
+        # ✅ Send correct JSON payload
+        payload = {"text": combined_text}
+        r = requests.post(HF_SPACE_URL, json=payload)
+        r.raise_for_status()
+
+        user_embedding = np.array(r.json()["embedding"])
+
+        # Get All scholarship embeddings
+        scholarships = supabase.table("scholarships").select("id, name, embedding").execute().data
+
+        # Compute similarity
+        results = []
+        for s in scholarships:
+            emb = np.array(s["embedding"])
+            similarity = np.dot(user_embedding, emb) / (np.linalg.norm(user_embedding) * np.linalg.norm(emb))
+            results.append({
+                "id": s["id"],
+                "name": s["name"],
+                "score": float(similarity)
+            })
+
+        # 5️⃣ Sort by similarity score
+        results.sort(key=lambda x: x["score"], reverse=True)
+
+        # Return top N matches (say 10)
+        return {"recommendations": results[:10]}
+
+    except Exception as e:
+        print("🔥 Error generating recommendations:", str(e))
         raise HTTPException(status_code=500, detail=str(e))

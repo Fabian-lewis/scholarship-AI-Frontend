@@ -6,7 +6,7 @@ import { ScholarshipCard } from "@/components/ScholarshipCard";
 import { GraduationCap, Search, Filter, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext"
-import { getRecentScholarships, Scholarship } from "@/api/scholarships";
+import { getRecentScholarships, getScholarships, Scholarship } from "@/api/scholarships";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const first = user?.user_metadata?.first_name || "";
   const last = user?.user_metadata?.last_name || "";
   const user_name = `${first} ${last}`.trim();
+  const id = user?.user_metadata?.id || user?.id;
 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +24,7 @@ const Dashboard = () => {
 
   useEffect(() =>{
     async function loadData(){
-      const data = await getRecentScholarships(6);
+      const data = await getScholarships(id);
       setScholarships(data);
       setIsLoading(false);
     }
