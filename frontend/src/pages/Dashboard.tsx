@@ -22,15 +22,21 @@ const Dashboard = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+  const [topScholarship, setTopScholarship] = useState<Scholarship | null>(null);
 
   useEffect(() =>{
     async function loadData(){
       const data = await getScholarships(id);
-      setScholarships(data);
+      if (data && data.length > 0) {
+        // Sort by score if available
+        const sorted = [...data].sort((a, b) => (b.score || 0) - (a.score || 0));
+        setTopScholarship(sorted[0]); // 🎯 highest score
+        setScholarships(sorted.slice(1)); // rest for listing
+      }
       setIsLoading(false);
     }
     loadData();
-  }, []);
+  }, [id]);
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -62,7 +68,7 @@ const Dashboard = () => {
             Welcome back, {user_name}👋
           </h1>
           <p className="text-muted-foreground">
-            We found <span className="font-semibold text-foreground">{scholarships.length}</span> scholarships that match your profile
+            We found <span className="font-semibold text-foreground">{scholarships.length + (topScholarship ? 1 : 0)}</span> scholarships that match your profile
           </p>
         </div>
 
@@ -75,14 +81,19 @@ const Dashboard = () => {
             <h2 className="text-lg font-semibold">Top Match for You</h2>
           </div>
           <p className="mb-4 text-primary-foreground/90">
-            Based on your profile, this scholarship is a 92% match!
+            Based on your profile, this scholarship is a{" "}
+            <span className="font-bold">{topScholarship.score?.toFixed(2)}%</span> match!
           </p>
           <div className="bg-background/10 backdrop-blur-sm rounded-xl p-4">
-            <h3 className="font-semibold mb-1">Global Excellence Scholarship</h3>
-            <p className="text-sm text-primary-foreground/80 mb-3">International Education Fund • $25,000</p>
-            <Button variant="secondary" size="sm">
-              View Details
-            </Button>
+            <h3 className="font-semibold mb-1">{topScholarship.name}</h3>
+            <p className="text-sm text-primary-foreground/80 mb-3">
+              Provider: {topScholarship.provider || "Unknown provider"} • Amount $: {topScholarship.amount || "Not Listed"} . Deadline: {topScholarship.deadline}
+            </p>
+            <Link to={topScholarship.link || "#"} target="_blank">
+              <Button variant="secondary" size="sm">
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
 
