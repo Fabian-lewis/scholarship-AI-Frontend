@@ -14,6 +14,7 @@ export interface Scholarship {
     amount?: string;
     source?: string;
     description?: string;
+    score?:number | null; // optional
 }
 
 const API_URL = import.meta.env.VITE_API_URL

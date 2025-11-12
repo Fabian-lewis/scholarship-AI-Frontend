@@ -22,8 +22,8 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
   };
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 90) return "text-success";
-    if (score >= 80) return "text-accent";
+    if (score >= 80) return "text-success";
+    if (score >= 70) return "text-accent";
     return "text-primary";
   };
 
@@ -39,9 +39,9 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
           </div>
           <Badge 
             variant="outline" 
-            className={`${getMatchScoreColor(80)} border-current shrink-0`} // Add matscore functionality
+            className={`${getMatchScoreColor(scholarship.score)} border-current shrink-0`}
           >
-            {scholarship.source} Match
+            {scholarship.score}% Match
           </Badge>
         </div>
       </CardHeader>

@@ -1,3 +1,4 @@
+// Dashboard.tsx page
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { ScholarshipCard } from "@/components/ScholarshipCard";
 import { GraduationCap, Search, Filter, SlidersHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext"
-import { getRecentScholarships, getScholarships, Scholarship } from "@/api/scholarships";
+import { getScholarships, Scholarship } from "@/api/scholarships";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");

@@ -239,7 +239,9 @@ async def recommend_scholarships(user_id: str):
         user_embedding = np.array(r.json()["embedding"])
 
         # Get All scholarship embeddings
-        scholarships = supabase.table("scholarships").select("id, name, embedding").execute().data
+        scholarships = supabase.table("scholarships").select(
+            "id,name,provider,deadline,posted_at,link,description,field_tags,country_tags,level_tags,amount,source,embedding"
+        ).execute().data
 
         # Compute similarity
         results = []
@@ -247,16 +249,27 @@ async def recommend_scholarships(user_id: str):
             emb = np.array(s["embedding"])
             similarity = np.dot(user_embedding, emb) / (np.linalg.norm(user_embedding) * np.linalg.norm(emb))
             results.append({
-                "id": s["id"],
-                "name": s["name"],
-                "score": float(similarity)
+               "id": s.get("id"),
+                "name": s.get("name"),
+                "provider": s.get("provider"),
+                "deadline": s.get("deadline"),
+                "posted_at": s.get("posted_at"),
+                "link": s.get("link"),
+                "description": s.get("description"),
+                "field_tags": s.get("field_tags"),
+                "country_tags": s.get("country_tags"),
+                "level_tags": s.get("level_tags"),
+                "amount": s.get("amount"),
+                "source": s.get("source"),
+                "score": round(similarity*100,2),
             })
 
         # 5️⃣ Sort by similarity score
         results.sort(key=lambda x: x["score"], reverse=True)
+        top_matches = results[:15]
 
         # Return top N matches (say 10)
-        return {"recommendations": results[:10]}
+        return {"scholarships": top_matches}
 
     except Exception as e:
         print("🔥 Error generating recommendations:", str(e))
