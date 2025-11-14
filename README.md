@@ -23,6 +23,12 @@ Scholarship AI simplifies this process by acting as your personal scholarship as
 | **State & Data** | React Query, Context API                                             |
 | **Routing**      | React Router DOM                                                     |
 
+### 🚀 Deployed Site
+
+[Click here](https://scholarship-agent.netlify.app/) to access the deployed test site
+[Click here](https://huggingface.co/spaces/annkabura/scholar-transform-service) to access hugging face microservices for this app
+
+
 
 ### 🛠️ Installation
 1. Clone the repository
