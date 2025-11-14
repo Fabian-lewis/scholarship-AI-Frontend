@@ -25,8 +25,8 @@ Scholarship AI simplifies this process by acting as your personal scholarship as
 
 ### 🚀 Deployed Site
 
-[Click here](https://scholarship-agent.netlify.app/) to access the deployed test site
-[Click here](https://huggingface.co/spaces/annkabura/scholar-transform-service) to access hugging face microservices for this app
+- [Click here](https://scholarship-agent.netlify.app/) to access the deployed test site.
+- [Click here](https://huggingface.co/spaces/annkabura/scholar-transform-service) to access hugging face microservices for this app.
 
 
 
