@@ -72,6 +72,7 @@ const Dashboard = () => {
           </p>
         </div>
 
+
         {/* Recommended Section */}
         <div className="mb-8 rounded-2xl bg-gradient-primary p-6 text-primary-foreground animate-fade-in">
           <div className="flex items-center gap-2 mb-2">
@@ -82,14 +83,17 @@ const Dashboard = () => {
           </div>
           <p className="mb-4 text-primary-foreground/90">
             Based on your profile, this scholarship is a{" "}
-            <span className="font-bold">{topScholarship.score?.toFixed(2)}%</span> match!
+            <span className="font-bold">{topScholarship?.score?.toFixed(2) || "0"}%</span>
           </p>
           <div className="bg-background/10 backdrop-blur-sm rounded-xl p-4">
-            <h3 className="font-semibold mb-1">{topScholarship.name}</h3>
+            <h3 className="font-semibold mb-1">{topScholarship?.name}</h3>
             <p className="text-sm text-primary-foreground/80 mb-3">
-              Provider: {topScholarship.provider || "Unknown provider"} • Amount $: {topScholarship.amount || "Not Listed"} . Deadline: {topScholarship.deadline}
+            Provider: {topScholarship?.provider || "Unknown provider"} • 
+Amount $: {topScholarship?.amount || "Not Listed"} • 
+Deadline: {topScholarship?.deadline || "N/A"}
+
             </p>
-            <Link to={topScholarship.link || "#"} target="_blank">
+            <Link to={topScholarship?.link || "#"} target="_blank">
               <Button variant="secondary" size="sm">
                 View Details
               </Button>
