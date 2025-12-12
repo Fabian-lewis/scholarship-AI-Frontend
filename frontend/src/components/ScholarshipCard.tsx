@@ -33,7 +33,7 @@ export const ScholarshipCard = ({ scholarship, onSave, onViewDetails }: Scholars
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
             <h3 className="font-semibold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-              <a href={scholarship.link || ""} target="_blank" rel="noopener noreferrer">{scholarship.name}</a>
+              <a href={scholarship.link} target="_blank" rel="noopener noreferrer">{scholarship.name}</a>
             </h3>
             <p className="text-sm text-muted-foreground mt-1">{scholarship.provider}</p>
           </div>
